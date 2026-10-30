@@ -1,0 +1,40 @@
+services:
+
+  sanvalentin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sanvalentin
+    restart: unless-stopped
+    ports:
+      - "3000:3000"           # Cambia el primer número si quieres otro puerto en el host
+    volumes:
+      # Música persistente — sube tus canciones aquí sin reconstruir la imagen
+      - ./public/music:/app/public/music:ro
+      # Fotos persistentes (opcional)
+      - ./public/images:/app/public/images:ro
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ---- NGINX reverse proxy (opcional pero recomendado para HTTPS) ----
+  nginx:
+    image: nginx:alpine
+    container_name: sanvalentin-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro   # tus certificados SSL aquí
+    depends_on:
+      - sanvalentin
+    profiles:
+      - with-nginx                            # solo se levanta con: docker compose --profile with-nginx up
