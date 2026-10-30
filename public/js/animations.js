@@ -228,8 +228,8 @@ function initUniverse() {
 // ---- NAVBAR SCROLL ----
 function initNavbar() {
   window.addEventListener('scroll', () => {
-    const nav = document.getElementById('navbar');
-    nav.classList.toggle('scrolled', window.scrollY > 60);
+    const nav = document.getElementById('navbar') || document.getElementById('top-header');
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 60);
   });
 }
 
